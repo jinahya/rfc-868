@@ -18,8 +18,11 @@
 package com.github.jinahya.rfc868;
 
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.Objects;
 
@@ -28,45 +31,152 @@ import java.util.Objects;
  *
  * @author Jin Kwon
  */
-public class Rfc868Times {
+public final class Rfc868Times {
 
 
-//    public static long getTime(final long now) {
-//
-//        if (now < 0L) {
-//            throw new IllegalArgumentException("now(" + now + ") < 0L");
-//        }
-//
-//        return (now - Rfc868Constants.BASE_DATE.getTime()) / 1000L;
-//    }
-//
-//
-//    public static long getTime() {
-//
-//        return getTime(System.currentTimeMillis());
-//    }
-//
-//
-//    public static long getTime(final Date now) {
-//
-//        if (now == null) {
-//            throw new NullPointerException("null now");
-//        }
-//
-//        return getTime(now.getTime());
-//    }
-//
-    public static long getTime(final Temporal now) {
+    /**
+     *
+     * @param now
+     *
+     * @return
+     */
+    public static Duration get(final Temporal now) {
 
-        return Duration.between(Rfc868Bases.BASE_INSTANT,
-                                Objects.requireNonNull(now, "null now"))
-                .get(ChronoUnit.SECONDS);
+        return Duration.between(Rfc868Constants.BASE_INSTANT,
+                                Objects.requireNonNull(now, "null now"));
     }
 
 
-    public static long getTime(final long now) {
+    /**
+     *
+     * @param now
+     *
+     * @return
+     */
+    public static long get(final long now) {
 
-        return (now - Rfc868Bases.BASE_MILLIS_FROM_EPOCH) / 1000L;
+        return (now - Rfc868Constants.BASE_MILLIS) / 1000L;
+    }
+
+
+    /**
+     *
+     * @param now
+     * @param output
+     * @param offset
+     *
+     * @return
+     *
+     * @see #get(long)
+     */
+    public static long put(final long now, final byte[] output, int offset) {
+
+        if (output == null) {
+            throw new NullPointerException("null output");
+        }
+
+        if (false && offset < 0) {
+            throw new IllegalArgumentException("offset(" + offset + ") < 0");
+        }
+
+        if (false && offset + 4 >= output.length) {
+            throw new IllegalArgumentException(
+                    "offset(" + offset + ") + 4 >= output.length("
+                    + output.length + ")");
+        }
+
+        final long time = get(now);
+
+        output[offset++] = (byte) ((time >> 0x18) & 0xFF);
+        output[offset++] = (byte) ((time >> 0x10) & 0xFF);
+        output[offset++] = (byte) ((time >> 0x08) & 0xFF);
+        output[offset++] = (byte) (time & 0xFF);
+
+        return time;
+    }
+
+
+    public static long get(final byte[] input, int offset) {
+
+        return ((input[offset++] & 0xFF) << 24)
+               | ((input[offset++] & 0xFF) << 16)
+               | ((input[offset++] & 0xFF) << 8)
+               | (input[offset++] & 0xFF);
+    }
+
+
+    /**
+     *
+     * @param now
+     * @param output
+     *
+     * @return
+     *
+     * @see #get(long)
+     */
+    public static long put(final long now, final ByteBuffer output) {
+
+        if (output == null) {
+            throw new NullPointerException("null buffer");
+        }
+
+        if (false && output.remaining() < 4) {
+            throw new IllegalArgumentException(
+                    "output.remaining(" + output.remaining() + ") < 4");
+        }
+
+        final long time = get(now);
+
+        output.put((byte) ((time >> 0x18) & 0xFF));
+        output.put((byte) ((time >> 0x10) & 0xFF));
+        output.put((byte) ((time >> 0x08) & 0xFF));
+        output.put((byte) (time & 0xFF));
+
+        return time;
+    }
+
+
+    public static long get(final ByteBuffer input) {
+
+        if (input == null) {
+            throw new NullPointerException("null input");
+        }
+
+        return ((input.get() & 0xFF) << 24)
+               | ((input.get() & 0xFF) << 16)
+               | ((input.get() & 0xFF) << 8)
+               | (input.get() & 0xFF);
+    }
+
+
+    public static long put(final long now, final OutputStream output)
+            throws IOException {
+
+        if (output == null) {
+            throw new NullPointerException("null output");
+        }
+
+        final long time = get(now);
+
+        output.write((int) ((time >> 24) & 0xFF));
+        output.write((int) ((time >> 0x10) & 0xFF));
+        output.write((int) ((time >> 0x08) & 0xFF));
+        output.write((int) (time & 0xFF));
+
+        return time;
+    }
+
+
+    public static long get(final InputStream input) throws IOException {
+
+        if (input == null) {
+            throw new NullPointerException("null input");
+        }
+
+        return (input.read() << 24)
+               | (input.read() << 16)
+               | (input.read() << 8)
+               | input.read();
     }
 
 

@@ -18,12 +18,11 @@
 package com.github.jinahya.rfc868;
 
 
-import java.lang.reflect.Method;
-import java.time.Instant;
+import java.time.Duration;
 import java.time.ZonedDateTime;
-import java.time.chrono.ChronoZonedDateTime;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -37,6 +36,9 @@ import org.testng.annotations.Test;
 public class Rfc868TimesTest {
 
 
+    /**
+     * logger.
+     */
     private static final Logger logger
             = LoggerFactory.getLogger(Rfc868TimesTest.class);
 
@@ -46,8 +48,8 @@ public class Rfc868TimesTest {
 
         final ZonedDateTime now = ZonedDateTime.now();
 
-        final long time = Rfc868Times.getTime(now);
-        logger.debug("now: {}", time);
+        final Duration time = Rfc868Times.get(now);
+        logger.debug("time: {}", time);
     }
 
 
@@ -56,15 +58,15 @@ public class Rfc868TimesTest {
 
         final long now = System.currentTimeMillis();
 
-        final long time = Rfc868Times.getTime(now); // seconds from 1 Jan 1900
+        final long time = Rfc868Times.get(now); // seconds from 1 Jan 1900
         logger.debug("time: {}", time);
 
         final Calendar calendar
-                = new GregorianCalendar(Rfc868Bases.BASE_TIME_ZONE);
+                = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
         calendar.clear();
         calendar.setTimeInMillis(now - (time * 1000L));
 
-        Assert.assertEquals(calendar.get(Calendar.YEAR), Rfc868Bases.BASE_YEAR);
+        Assert.assertEquals(calendar.get(Calendar.YEAR), 1900);
         Assert.assertEquals(calendar.get(Calendar.MONTH), Calendar.JANUARY);
         Assert.assertEquals(calendar.get(Calendar.DAY_OF_MONTH), 1);
         Assert.assertEquals(calendar.get(Calendar.HOUR_OF_DAY), 0);
@@ -73,16 +75,6 @@ public class Rfc868TimesTest {
         //Assert.assertEquals(calendar.get(Calendar.MILLISECOND), 0);
 
         logger.debug("calendar.time: {}", calendar.getTime());
-    }
-
-
-    @Test
-    public void test_() throws NoSuchMethodException {
-        assert ChronoZonedDateTime.class.isAssignableFrom(ZonedDateTime.class);
-        final Method toInstant = ChronoZonedDateTime.class.getMethod("toInstant");
-        final ZonedDateTime now = ZonedDateTime.now();
-        final Instant instant = now.toInstant();
-        System.out.println(instant);
     }
 
 

@@ -18,6 +18,16 @@
 package com.github.jinahya.rfc868;
 
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
+
 /**
  *
  * @author Jin Kwon
@@ -25,10 +35,35 @@ package com.github.jinahya.rfc868;
 public final class Rfc868Constants {
 
 
-    public static final int PORT = 0x25; // 37
-
-
     public static final int PORT_TCP = 0x25; // 37
+
+
+    public static final int PORT_UDP = PORT_TCP; // 37
+
+
+    private static final int YEAR = 1900;
+
+
+    private static final String TIME_ZONE_ID = "GMT";
+
+
+    public static final Instant BASE_INSTANT
+            = ZonedDateTime.of(LocalDate.of(YEAR, 1, 1),
+                               LocalTime.of(0, 0),
+                               ZoneId.of(TIME_ZONE_ID))
+            .toInstant();
+
+
+    public static final long BASE_MILLIS;
+
+
+    static {
+        final Calendar calendar
+                = new GregorianCalendar(TimeZone.getTimeZone(TIME_ZONE_ID));
+        calendar.clear();
+        calendar.set(Calendar.YEAR, YEAR);
+        BASE_MILLIS = calendar.getTimeInMillis();
+    }
 
 
     private Rfc868Constants() {
