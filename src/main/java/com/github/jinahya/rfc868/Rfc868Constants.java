@@ -21,6 +21,7 @@ package com.github.jinahya.rfc868;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Calendar;
@@ -41,27 +42,51 @@ public final class Rfc868Constants {
     public static final int PORT_UDP = PORT_TCP; // 37
 
 
-    private static final int YEAR = 1900;
+    public static final int BASE_YEAR = 1900;
+
+
+    public static final Month BASE_MONTH = Month.JANUARY;
+
+
+    public static final int BASE_DAY_OF_MONTH = 1;
+
+
+    public static final int BASE_HOUR = 0;
+
+
+    public static final int BASE_MINUTE = 0;
 
 
     private static final String TIME_ZONE_ID = "GMT";
 
 
+    public static final LocalDate BASE_LOCAL_DATE
+            = LocalDate.of(BASE_YEAR, BASE_MONTH, BASE_DAY_OF_MONTH);
+
+
+    public static final LocalTime BASE_LOCAL_TIME
+            = LocalTime.of(BASE_HOUR, BASE_MINUTE);
+
+
+    public static final ZoneId BASE_ZONE_ID = ZoneId.of(TIME_ZONE_ID);
+
+
     public static final Instant BASE_INSTANT
-            = ZonedDateTime.of(LocalDate.of(YEAR, 1, 1),
-                               LocalTime.of(0, 0),
-                               ZoneId.of(TIME_ZONE_ID))
+            = ZonedDateTime.of(BASE_LOCAL_DATE, BASE_LOCAL_TIME, BASE_ZONE_ID)
             .toInstant();
+
+
+    public static final TimeZone BASE_TIME_ZONE
+            = TimeZone.getTimeZone(TIME_ZONE_ID);
 
 
     public static final long BASE_MILLIS;
 
 
     static {
-        final Calendar calendar
-                = new GregorianCalendar(TimeZone.getTimeZone(TIME_ZONE_ID));
+        final Calendar calendar = new GregorianCalendar(BASE_TIME_ZONE);
         calendar.clear();
-        calendar.set(Calendar.YEAR, YEAR);
+        calendar.set(Calendar.YEAR, BASE_YEAR);
         BASE_MILLIS = calendar.getTimeInMillis();
     }
 
